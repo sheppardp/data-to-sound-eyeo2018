@@ -1,7 +1,7 @@
 var samples = [];
 var buffer = [];
 var BUFFER_LENGTH = 20; 
-var iterateTime = 2000;
+var iterateTime = 500;
 // Dimensions for visualization
 var canvas_width = 1000;
 var canvas_height = 500;
@@ -43,30 +43,6 @@ function preload() {
     var filename = 'samples3/trimmed/' + soundClips[i].file ;
     console.log('loaded file ' + filename)
     soundClips[i].sound = loadSound(filename);
-  }
-
-  for (var i =0; i<files_good.length; i++){
-    var filename = 'samples3/trimmed/' + files_good[i] ;
-    var s = loadSound(filename);
-    samples_good.push(s);
-  }
-  for (var i =0; i<files_bad.length; i++){
-    var filename = 'samples3/trimmed/' + files_bad[i] ;
-    console.log('loaded ' + filename);
-    var s = loadSound(filename);
-    samples_bad.push(s);
-  }
-  for (var i =0; i<files_newhigh.length; i++){
-    var filename = 'samples3/trimmed/' + files_newhigh[i] ;
-    console.log('loaded ' + filename);
-    var s = loadSound(filename);
-    samples_newhigh.push(s);
-  }
-  for (var i =0; i<files_newlow.length; i++){
-    var filename = 'samples3/trimmed/' + files_newlow[i] ;
-    console.log('loaded ' + filename);
-    var s = loadSound(filename);
-    samples_newlow.push(s);
   }
 }
 
@@ -127,7 +103,7 @@ function drawToScreen(i){
     fill(240, 0, 0);
     noStroke();
   }
-  let displayText = all_sightings[i]['arr'][1] + ' ' + all_sightings[i]['arr'][5] + ' (' + all_sightings[i]['arr'][8] + '%)';
+  let displayText = all_sightings[i]['arr'][0] + ' ' + all_sightings[i]['arr'][4] + ' (' + all_sightings[i]['arr'][7] + '%)';
   // let displayText = 'row ' + i;
   // let displayText = cleanText(all_sightings[i]['arr'][7]);
   // Show date
@@ -144,10 +120,10 @@ function drawToScreen(i){
 
 function updateBuffer(i) {
   if (buffer.length < BUFFER_LENGTH) {
-    buffer.push(parseFloat(all_sightings[i]['arr'][5]));
+    buffer.push(parseFloat(all_sightings[i]['arr'][4]));
   } else {
     buffer.shift();
-    buffer.push(parseFloat(all_sightings[i]['arr'][5]));
+    buffer.push(parseFloat(all_sightings[i]['arr'][4]));
   }
 }
 // Map actual values to points on the screen
@@ -198,21 +174,19 @@ function drawPoints(buffer_arr) {
 function nextRow(i){
   updateBuffer(i);
 
+  // Visualization
   drawToScreen(i);
   if (buffer) {
     drawPoints(buffer, i);  
   }
-  let xpoint = all_sightings[i]['arr'][0];
-  let price = all_sightings[i]['arr'][5];
-  let dirn = all_sightings[i]['arr'][8];
-  let next_dirn = all_sightings[i+1]['arr'][8];
+  let price = all_sightings[i]['arr'][4];
+  let old_price = all_sightings[i-1]['arr'][4];
+  console.log(all_sightings[i]);
+
+  // let next_dirn = all_sightings[i+1]['arr'][8];
   // Map the relative magnitude of change to volume:
   var new_max;
-  let rel_change = Math.abs(dirn) / price;
-  rel_change = (rel_change >= 1) ? 1.0 : rel_change; 
-
-
-  console.log('x = ' + xpoint + ', change = ' + dirn + ' (' +  100 * rel_change + '%)');
+  
   // Update local min and max 
   if (price > data_lims['max_global']) {
     data_lims['max_global'] = price;
@@ -223,9 +197,22 @@ function nextRow(i){
   } else {
     new_max = false;
   }
-  
+  var dirn;
+  // Determine the direction of the change: 
+  if (i >= 1) {
+    // Use the previous change since playing the sound will be lagged by a cycle
+    dirn = all_sightings[i-1]['arr'][7]; 
+    /*dirn = all_sightings[i]['arr'][7]; */
+  } else {
+    dirn = +1.0; 
+  }
+
   setTimeout(function(){
 
+    
+    let rel_change = Math.abs(dirn) / price;
+    rel_change = (rel_change >= 1) ? 1.0 : rel_change; 
+    console.log('i = ' + i + ', change = ' + dirn + ' (' +  100 * rel_change + '%)');
     // decide what to do with the sounds:
     var soundTrigger; 
     
@@ -241,43 +228,9 @@ function nextRow(i){
     console.log('soundTrigger = ' + soundTrigger + ', currentSound = ' + currentSound);
     var prevTrigger = currentSound;
     toggleSounds(soundTrigger, prevTrigger);
-    // samples_good[1].play(); // just make sure we can still play a sound
-    // samples_good[1].play();
 
-    // if (dirn >= 0 & (new_max == true)) { 
-    //   samples_newhigh[0].play();
-    //   console.log('new high :)');
-    //   samples_good[0].stop();
-    //   samples_good[1].stop();
-    //   samples_bad[0].stop();
-    //   samples_bad[1].stop();
-    //   samples_newlow[0].stop();
-    // } else if (dirn >= 0 ) {
-    //   // samples_good[index].setVolume(0.05);
-    //   samples_good[0].play();
-    //   samples_good[1].stop();
-    //   samples_newhigh[0].stop();
-    //   samples_bad[0].stop();
-    //   samples_bad[1].stop();
-    //   samples_newlow[0].stop();
-    // } else if (dirn < 0 & (new_max == true)) { 
-    //   samples_newlow[0].play();
-    //   samples_bad[0].stop();
-    //   samples_bad[1].stop();
-    //   samples_good[0].stop();
-    //   samples_good[1].stop();
-    //   samples_newhigh[0].stop()
-    // } else {
-    //   let index = i % samples_bad.length;
-    //   //samples_good[index].setVolume(rel_change);
-    //   // samples_good[index].setVolume(0);
-    //   samples_bad[0].play();
-    //   samples_good[0].stop();
-    //   samples_good[1].stop();
-    //   samples_newlow[0].stop();
-    //   samples_newhigh[0].stop();
-    // }
-    if (i + 1 < all_sightings.length){
+
+    if (i  < all_sightings.length){
       nextRow(i+1);
     }
   }, iterateTime)
