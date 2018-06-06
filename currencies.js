@@ -16,14 +16,6 @@ var soundClips = [{'trigger': 'gain', 'file': 'yay.m4a', 'sound': null},
   {'trigger': 'record_high', 'file': 'applause.m4a', 'sound': null}, 
   {'trigger': 'record_low', 'file': 'flush.m4a', 'sound': null}];
 
-var files_good = ['car_driving_away1.m4a', 'bull.m4a'];
-var files_bad = ['flush.m4a', 'bear.m4a'];
-var files_newhigh = ['applause.m4a'];
-var files_newlow = ['sad_trombone.m4a'];
-var samples_good = [];
-var samples_bad = [];
-var samples_newhigh = [];
-var samples_newlow = [];
 
 var data_lims = {'min_global' : Infinity, 'max_global' : -Infinity, 
   'min_local' : Infinity, 'max_local' : -Infinity,
