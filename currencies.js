@@ -1,7 +1,7 @@
 var samples = [];
 var buffer = [];
 var BUFFER_LENGTH = 20; 
-var iterateTime = 500;
+var iterateTime = 250;
 // Dimensions for visualization
 var canvas_width = 1000;
 var canvas_height = 500;
@@ -28,6 +28,10 @@ var samples_newlow = [];
 var data_lims = {'min_global' : Infinity, 'max_global' : -Infinity, 
   'min_local' : Infinity, 'max_local' : -Infinity,
   'max_pos' : 0, 'max_neg' : 0 };
+
+function roundNumber(x) { 
+  return Math.round(x * 100) / 100.0
+}
 
 function preload() {
   /* Data is the daily closing price of Bitcoin slightly modified from the Kaggle dataset: 
@@ -81,17 +85,6 @@ function toggleSounds(current, previous) {
 
 }
 
-function cleanText(text){
-  text = text.replace(new RegExp("&#44", 'g'), ",");
-  text = text.replace(new RegExp("&#39", 'g'), "'");
-  text = text.replace(new RegExp("&amp;", 'g'), "&");
-  text = text.replace(new RegExp("&#33", 'g'), "!");
-  text = text.replace(new RegExp("&#8217", 'g'), "\'");
-  text = text.replace(new RegExp("&#8230", 'g'), "...");
-  text = text.replace(new RegExp("&quot;", 'g'), "\"");
-  return text.trim();
-}
-
 function drawToScreen(i){
   background(0, 0, 40);
   textSize(18);
@@ -103,7 +96,7 @@ function drawToScreen(i){
     fill(240, 0, 0);
     noStroke();
   }
-  let displayText = all_sightings[i]['arr'][0] + ' ' + all_sightings[i]['arr'][4] + ' (' + all_sightings[i]['arr'][7] + '%)';
+  let displayText = all_sightings[i]['arr'][0] + ' ' + all_sightings[i]['arr'][4] + ' (' + roundNumber(all_sightings[i]['arr'][7]) + '%)';
   // let displayText = 'row ' + i;
   // let displayText = cleanText(all_sightings[i]['arr'][7]);
   // Show date
@@ -180,7 +173,6 @@ function nextRow(i){
     drawPoints(buffer, i);  
   }
   let price = all_sightings[i]['arr'][4];
-  let old_price = all_sightings[i-1]['arr'][4];
   console.log(all_sightings[i]);
 
   // let next_dirn = all_sightings[i+1]['arr'][8];
